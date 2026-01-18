@@ -1,0 +1,274 @@
+{
+  "name": "vscode-pdf-translate",
+  "displayName": "PDF Translate",
+  "description": "Translate PDF files with PDFMathTranslate while preserving layout, formulas and figures",
+  "version": "1.0.0",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "icon": "media/icon.png",
+  "activationEvents": [
+    "onLanguage:pdf"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pdfTranslate.translate",
+        "title": "Translate PDF",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "pdfTranslate.selectLanguages",
+        "title": "Select Translation Languages"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceExtname == .pdf",
+          "command": "pdfTranslate.translate",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .pdf",
+          "command": "pdfTranslate.translate",
+          "group": "2_workspace"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PDF Translate",
+      "properties": {
+        "pdfTranslate.sourceLanguage": {
+          "type": "string",
+          "default": "en",
+          "description": "Source language code",
+          "enum": [
+            "en",
+            "zh",
+            "zh-TW",
+            "ja",
+            "ko",
+            "fr",
+            "de",
+            "es",
+            "ru",
+            "it",
+            "ar",
+            "pt",
+            "nl",
+            "pl",
+            "tr",
+            "vi",
+            "th",
+            "id",
+            "hi",
+            "uk",
+            "cs",
+            "ro",
+            "sv",
+            "hu",
+            "el",
+            "da",
+            "fi",
+            "no",
+            "sk",
+            "bg",
+            "hr",
+            "sr",
+            "bn",
+            "ta",
+            "te",
+            "mr",
+            "gu",
+            "kn",
+            "ml",
+            "ur",
+            "fa"
+          ]
+        },
+        "pdfTranslate.targetLanguage": {
+          "type": "string",
+          "default": "zh",
+          "description": "Target language code",
+          "enum": [
+            "zh",
+            "zh-TW",
+            "en",
+            "ja",
+            "ko",
+            "fr",
+            "de",
+            "es",
+            "ru",
+            "it",
+            "ar",
+            "pt",
+            "nl",
+            "pl",
+            "tr",
+            "vi",
+            "th",
+            "id",
+            "hi",
+            "uk",
+            "cs",
+            "ro",
+            "sv",
+            "hu",
+            "el",
+            "da",
+            "fi",
+            "no",
+            "sk",
+            "bg",
+            "hr",
+            "sr",
+            "bn",
+            "ta",
+            "te",
+            "mr",
+            "gu",
+            "kn",
+            "ml",
+            "ur",
+            "fa"
+          ]
+        },
+        "pdfTranslate.translationService": {
+          "type": "string",
+          "default": "bing",
+          "description": "Translation service to use",
+          "enum": [
+            "google",
+            "bing",
+            "openai",
+            "azure-openai",
+            "deepl",
+            "deeplx",
+            "ollama",
+            "zhipu",
+            "silicon",
+            "groq",
+            "deepseek",
+            "gemini",
+            "azure",
+            "tencent"
+          ],
+          "enumDescriptions": [
+            "Google Translate (Free, no API key required)",
+            "Bing Translator (Free, no API key required)",
+            "OpenAI (Requires OPENAI_API_KEY)",
+            "Azure OpenAI (Requires AZURE_OPENAI_KEY)",
+            "DeepL (Requires DEEPL_AUTH_KEY)",
+            "DeepLX (Free DeepL alternative)",
+            "Ollama (Local LLM)",
+            "Zhipu AI (智谱AI)",
+            "Silicon Flow",
+            "Groq",
+            "DeepSeek (深度求索)",
+            "Google Gemini (Requires GEMINI_API_KEY)",
+            "Azure Translator",
+            "Tencent TMT (腾讯机器翻译)"
+          ]
+        },
+        "pdfTranslate.threads": {
+          "type": "number",
+          "default": 4,
+          "description": "Number of threads for translation (0 = auto)",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "pdfTranslate.pdf2zhPath": {
+          "type": "string",
+          "default": "pdf2zh",
+          "description": "Path to pdf2zh command. Leave as 'pdf2zh' if installed globally, or specify full path."
+        },
+        "pdfTranslate.outputDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Custom output directory for translated PDFs. Leave empty to use 'translated-pdfs' subfolder in the source PDF's directory."
+        },
+        "pdfTranslate.apiKeys": {
+          "type": "object",
+          "default": {},
+          "description": "API keys for various translation services",
+          "properties": {
+            "OPENAI_API_KEY": {
+              "type": "string",
+              "description": "OpenAI API Key"
+            },
+            "OPENAI_BASE_URL": {
+              "type": "string",
+              "description": "OpenAI Base URL (optional)"
+            },
+            "OPENAI_MODEL": {
+              "type": "string",
+              "description": "OpenAI Model (default: gpt-4o-mini)"
+            },
+            "DEEPL_AUTH_KEY": {
+              "type": "string",
+              "description": "DeepL Auth Key"
+            },
+            "AZURE_OPENAI_KEY": {
+              "type": "string",
+              "description": "Azure OpenAI Key"
+            },
+            "AZURE_OPENAI_ENDPOINT": {
+              "type": "string",
+              "description": "Azure OpenAI Endpoint"
+            },
+            "GEMINI_API_KEY": {
+              "type": "string",
+              "description": "Google Gemini API Key"
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3",
+    "@vscode/test-electron": "^2.3.9"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^4.7.76"
+  },
+  "overrides": {
+    "tar": "^7.5.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/vscode-pdf-translate"
+  },
+  "license": "AGPL-3.0",
+  "keywords": [
+    "pdf",
+    "translate",
+    "translation",
+    "pdf2zh",
+    "multilingual",
+    "document"
+  ]
+}
