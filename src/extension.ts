@@ -65,11 +65,8 @@ async function translateCommand(uri: vscode.Uri | undefined): Promise<void> {
         return;
     }
 
-    // Show translating notification
-    vscode.window.showInformationMessage(`Translating ${fileName}...`);
-
     try {
-        // Translate PDF
+        // Translate PDF (progress bar will be shown automatically)
         const result = await translator.translatePDF(pdfPath);
 
         if (result.error) {

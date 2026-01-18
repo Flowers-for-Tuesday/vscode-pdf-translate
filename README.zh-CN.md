@@ -15,17 +15,61 @@
 
 ## 前置要求
 
-使用本插件前，必须先安装 [pdf2zh](https://github.com/Byaidu/PDFMathTranslate)：
+使用本插件前，必须先安装 [pdf2zh](https://github.com/Byaidu/PDFMathTranslate)。
+
+### 方法1：使用 uv（推荐）⭐
+
+[uv](https://github.com/astral-sh/uv) 是一个快速的 Python 包管理器，可以自动处理 Python 版本管理。**无需手动安装 Python 3.10-3.12！**
+
+#### Windows 系统
+
+打开 PowerShell 并运行：
+
+```powershell
+# 安装 uv
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# 使用 Python 3.12 安装 pdf2zh
+uv tool install --python 3.12 pdf2zh
+```
+
+#### macOS / Linux 系统
+
+打开终端并运行：
+
+```bash
+# 安装 uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 使用 Python 3.12 安装 pdf2zh
+uv tool install --python 3.12 pdf2zh
+```
+
+#### 验证安装
+
+```bash
+pdf2zh --version
+```
+
+**为什么选择 uv？**
+- ⚡ **速度快 10-100 倍** - 比 pip 快得多
+- 🔧 **自动管理 Python 版本** - 自动下载 Python 3.12
+- 🎯 **环境隔离** - 不会与系统 Python 冲突
+- 🌐 **跨平台** - Windows/macOS/Linux 使用相同命令
+
+### 方法2：使用 pip（传统方式）
+
+如果你更喜欢传统方法，需要预先安装 Python 3.10-3.12：
 
 ```bash
 pip install pdf2zh
 ```
 
-验证安装：
+**注意**：确保已安装 Python 3.10、3.11 或 3.12。不支持 Python 3.13+。
 
-```bash
-pdf2zh --version
-```
+### 详细设置指南
+
+有关故障排除和高级配置，请参阅 [UV 设置指南](./docs/UV_SETUP_GUIDE.md)。
 
 ## 安装方法
 
@@ -161,8 +205,44 @@ translated-pdfs/
 
 ## 常见问题
 
-### 找不到pdf2zh
-确保pdf2zh已安装并在PATH中：
+### 找不到 pdf2zh
+
+**如果使用 uv 安装：**
+
+1. **重启 VSCode**（最常见的解决方案）
+2. 检查 pdf2zh 是否在 PATH 中：
+   ```bash
+   # Windows PowerShell
+   where.exe pdf2zh
+
+   # macOS/Linux
+   which pdf2zh
+   ```
+3. 如果找不到，添加到 PATH 或在设置中配置完整路径：
+
+   **Windows 系统：**
+   ```json
+   {
+     "pdfTranslate.pdf2zhPath": "C:\\Users\\你的用户名\\.local\\bin\\pdf2zh.exe"
+   }
+   ```
+
+   **macOS/Linux 系统：**
+   ```json
+   {
+     "pdfTranslate.pdf2zhPath": "~/.local/bin/pdf2zh"
+   }
+   ```
+
+4. 如果仍然不工作，重新安装：
+   ```bash
+   uv tool uninstall pdf2zh
+   uv tool install --python 3.12 pdf2zh
+   ```
+
+**如果使用 pip 安装：**
+
+确保 pdf2zh 已安装并在 PATH 中：
 ```bash
 pip install pdf2zh
 pdf2zh --version
@@ -173,6 +253,15 @@ pdf2zh --version
 {
   "pdfTranslate.pdf2zhPath": "C:\\Python\\Scripts\\pdf2zh.exe"
 }
+```
+
+### Python 版本不兼容
+
+pdf2zh 需要 Python 3.10-3.12。如果你的系统是 Python 3.13+：
+
+**解决方案**：使用 uv 自动管理正确的 Python 版本：
+```bash
+uv tool install --python 3.12 pdf2zh
 ```
 
 ### Google翻译失败

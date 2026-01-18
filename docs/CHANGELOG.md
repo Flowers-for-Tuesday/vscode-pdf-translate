@@ -1,0 +1,174 @@
+# 开发日志 (Development Changelog)
+
+本文件记录 vscode-pdf-translate 项目的所有重要更新和修改。
+
+---
+
+## 2026-01-19
+
+### 添加实时进度条功能
+
+**修改文件:**
+- `src/translator.ts`
+- `src/extension.ts`
+
+**功能描述:**
+为翻译过程添加实时进度条，解析 pdf2zh 的 tqdm 输出并显示在 VSCode 通知区域。
+
+**实现细节:**
+
+1. **新增 `parseProgress` 方法** (translator.ts)
+   - 解析 tqdm 格式: `29%|██       | 2/7 [00:00<00:02,  2.08it/s]`
+   - 提取：百分比、当前页数、总页数、时间信息
+   - 返回用户友好的消息格式
+
+2. **修改 `executeTranslation` 方法** (translator.ts)
+   - 添加 `progress` 参数（可选）
+   - 监听 stderr 输出并解析进度
+   - 使用增量方式更新进度条
+   - 跟踪 `lastProgress` 避免重复更新
+
+3. **修改 `translatePDF` 方法** (translator.ts)
+   - 使用 `vscode.window.withProgress` API
+   - 配置：显示在通知区域，不可取消
+   - 标题：`Translating PDF`
+
+4. **移除静态消息** (extension.ts)
+   - 删除 `vscode.window.showInformationMessage("Translating...")`
+   - 进度条自动显示，不需要额外提示
+
+**用户体验改进:**
+- ✅ 实时显示翻译进度（页数、百分比）
+- ✅ 显示时间信息（已用时间、预估剩余时间、速度）
+- ✅ 符合 VSCode 原生体验
+- ✅ 非阻塞，不影响性能
+
+**示例输出:**
+```
+Translating PDF
+2/7 pages (29%) - 00:00<00:02, 2.08it/s
+```
+
+---
+
+### 更新安装文档，推荐使用 uv
+
+**修改文件:**
+- `README.md`
+- `README.zh-CN.md`
+
+**新增文件:**
+- `docs/UV_SETUP_GUIDE.md` - uv 详细设置指南
+
+**主要改动:**
+
+1. **Prerequisites 部分重构**
+   - 方法1：使用 uv（推荐）⭐
+     - Windows: PowerShell 安装命令
+     - macOS/Linux: curl 安装命令
+     - 强调优势：快速、自动 Python 版本管理、环境隔离
+   - 方法2：使用 pip（传统方式）
+     - 保留传统方法作为备选
+     - 添加 Python 版本要求说明（3.10-3.12）
+
+2. **Troubleshooting 部分更新**
+   - 分别提供 uv 和 pip 的故障排除步骤
+   - 新增"Python 版本不兼容"章节
+   - Windows/macOS/Linux 分平台说明路径配置
+   - 添加重新安装步骤
+
+3. **UV Setup Guide 详细文档**
+   - 完整的安装步骤
+   - 常见问题 FAQ
+   - 与 pip 对比表格
+   - 高级用法说明
+
+**用户体验改进:**
+- ✅ 降低使用门槛（无需手动安装 Python）
+- ✅ 解决 Python 3.13+ 兼容问题
+- ✅ 安装速度提升 10-100 倍
+- ✅ 中英文文档同步更新
+
+**关键优势:**
+```bash
+# 仅需两条命令完成配置
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv tool install --python 3.12 pdf2zh
+```
+
+---
+
+### 创建 CLAUDE.md 项目指南
+
+**新增文件:**
+- `CLAUDE.md`
+
+**内容概述:**
+为未来的 Claude Code 实例提供项目架构和开发指南。
+
+**包含内容:**
+1. 项目概述
+2. 构建和开发命令
+3. 核心组件架构说明
+4. 翻译流程详解
+5. 外部依赖说明
+6. 关键实现细节
+
+---
+
+## 待办事项 (TODO)
+
+### 短期
+- [ ] 添加进度条取消功能
+- [ ] 改进错误提示（在进度条中显示）
+- [ ] 添加状态栏进度显示
+
+### 中期
+- [ ] 支持批量翻译多个 PDF
+- [ ] 添加一键安装 uv 和 pdf2zh 的命令
+- [ ] 添加诊断工具检测环境问题
+- [ ] 创建安装演示 GIF
+
+### 长期
+- [ ] 支持更多翻译服务
+- [ ] 添加翻译历史记录
+- [ ] 集成 PDF 预览功能
+- [ ] 支持自定义翻译模板
+
+---
+
+## 版本历史 (Version History)
+
+### v1.0.0 (未发布)
+- ✅ 基础翻译功能
+- ✅ 多语言支持（40+ 语言）
+- ✅ 多翻译服务支持（14+ 服务）
+- ✅ 实时进度条
+- ✅ uv 安装支持
+- ✅ 双输出模式（mono + dual）
+- ✅ 侧边栏预览
+
+---
+
+## 技术债务 (Technical Debt)
+
+1. **pdfViewer.ts 未使用**
+   - 当前使用 VSCode 内置 PDF 查看器
+   - 自定义查看器代码保留但未激活
+   - 考虑：移除或改进自定义查看器
+
+2. **错误处理改进**
+   - 需要更细粒度的错误类型
+   - 添加用户友好的错误消息
+   - 实现错误恢复机制
+
+3. **测试覆盖**
+   - 缺少单元测试
+   - 需要集成测试
+   - 添加 E2E 测试
+
+---
+
+## 贡献者 (Contributors)
+
+本日志记录由 Claude Code 辅助完成。

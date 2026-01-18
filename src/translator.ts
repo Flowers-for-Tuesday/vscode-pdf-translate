@@ -67,7 +67,17 @@ export class PDFTranslator {
         this.outputChannel.appendLine(`Output directory: ${outputDir}`);
         this.outputChannel.appendLine(`Executing: ${command}`);
 
-        return this.executeTranslation(command, pdfPath, outputDir, config);
+        // Execute translation with progress bar
+        return vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: `Translating PDF`,
+                cancellable: false
+            },
+            async (progress) => {
+                return this.executeTranslation(command, pdfPath, outputDir, config, progress);
+            }
+        );
     }
 
     /**
@@ -77,7 +87,8 @@ export class PDFTranslator {
         command: string,
         pdfPath: string,
         outputDir: string,
-        config: TranslationConfig
+        config: TranslationConfig,
+        progress?: vscode.Progress<{ message?: string; increment?: number }>
     ): Promise<TranslationResult> {
         return new Promise((resolve) => {
             const envVars = {
@@ -92,14 +103,35 @@ export class PDFTranslator {
             });
 
             let stderr = '';
+            let lastProgress = 0;
 
             childProcess.stdout?.on('data', (data: Buffer) => {
                 this.outputChannel.append(data.toString());
             });
 
             childProcess.stderr?.on('data', (data: Buffer) => {
-                stderr += data.toString();
-                this.outputChannel.append(`[STDERR] ${data.toString()}`);
+                const output = data.toString();
+                stderr += output;
+                this.outputChannel.append(`[STDERR] ${output}`);
+
+                // Parse progress from tqdm output
+                // Format: 29%|██       | 2/7 [00:00<00:02,  2.08it/s]
+                if (progress) {
+                    const progressInfo = this.parseProgress(output);
+                    if (progressInfo) {
+                        const { percent, current, total, message } = progressInfo;
+
+                        // Calculate increment since last update
+                        const increment = percent - lastProgress;
+                        if (increment > 0) {
+                            progress.report({
+                                increment: increment,
+                                message: message
+                            });
+                            lastProgress = percent;
+                        }
+                    }
+                }
             });
 
             childProcess.on('error', (error) => {
@@ -122,6 +154,29 @@ export class PDFTranslator {
                 }
             });
         });
+    }
+
+    /**
+     * Parse progress information from tqdm output
+     * Example: "29%|██       | 2/7 [00:00<00:02,  2.08it/s]"
+     */
+    private parseProgress(output: string): { percent: number; current: number; total: number; message: string } | null {
+        // Match tqdm progress format
+        const progressMatch = output.match(/(\d+)%.*?\|\s*(\d+)\/(\d+)\s*\[([^\]]+)\]/);
+
+        if (progressMatch) {
+            const percent = parseInt(progressMatch[1], 10);
+            const current = parseInt(progressMatch[2], 10);
+            const total = parseInt(progressMatch[3], 10);
+            const timeInfo = progressMatch[4].trim();
+
+            // Create a user-friendly message
+            const message = `${current}/${total} pages (${percent}%) - ${timeInfo}`;
+
+            return { percent, current, total, message };
+        }
+
+        return null;
     }
 
     /**

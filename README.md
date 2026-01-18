@@ -15,17 +15,61 @@ A VSCode extension for translating PDF documents while preserving layout, formul
 
 ## Prerequisites
 
-Before using this extension, you must install [pdf2zh](https://github.com/Byaidu/PDFMathTranslate):
+Before using this extension, you must install [pdf2zh](https://github.com/Byaidu/PDFMathTranslate).
+
+### Method 1: Using uv (Recommended) ⭐
+
+[uv](https://github.com/astral-sh/uv) is a fast Python package manager that automatically handles Python version management. **No need to manually install Python 3.10-3.12!**
+
+#### Windows
+
+Open PowerShell and run:
+
+```powershell
+# Install uv
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Install pdf2zh with Python 3.12
+uv tool install --python 3.12 pdf2zh
+```
+
+#### macOS / Linux
+
+Open Terminal and run:
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install pdf2zh with Python 3.12
+uv tool install --python 3.12 pdf2zh
+```
+
+#### Verify Installation
+
+```bash
+pdf2zh --version
+```
+
+**Why uv?**
+- ⚡ **10-100x faster** than pip
+- 🔧 **Automatic Python version management** - downloads Python 3.12 automatically
+- 🎯 **Isolated environments** - won't conflict with system Python
+- 🌐 **Cross-platform** - same commands for Windows/macOS/Linux
+
+### Method 2: Using pip (Alternative)
+
+If you prefer the traditional method, you need Python 3.10-3.12 pre-installed:
 
 ```bash
 pip install pdf2zh
 ```
 
-Verify installation:
+**Note**: Ensure you have Python 3.10, 3.11, or 3.12 installed. Python 3.13+ is not supported.
 
-```bash
-pdf2zh --version
-```
+### Detailed Setup Guide
+
+For troubleshooting and advanced configuration, see [UV Setup Guide](./docs/UV_SETUP_GUIDE.md).
 
 ## Installation
 
@@ -162,6 +206,42 @@ To customize the output location, set `pdfTranslate.outputDirectory`:
 ## Troubleshooting
 
 ### pdf2zh not found
+
+**If you installed with uv:**
+
+1. **Restart VSCode** (most common solution)
+2. Check if pdf2zh is in PATH:
+   ```bash
+   # Windows PowerShell
+   where.exe pdf2zh
+
+   # macOS/Linux
+   which pdf2zh
+   ```
+3. If not found, add to PATH or configure the full path in settings:
+
+   **Windows:**
+   ```json
+   {
+     "pdfTranslate.pdf2zhPath": "C:\\Users\\YourName\\.local\\bin\\pdf2zh.exe"
+   }
+   ```
+
+   **macOS/Linux:**
+   ```json
+   {
+     "pdfTranslate.pdf2zhPath": "~/.local/bin/pdf2zh"
+   }
+   ```
+
+4. If still not working, reinstall:
+   ```bash
+   uv tool uninstall pdf2zh
+   uv tool install --python 3.12 pdf2zh
+   ```
+
+**If you installed with pip:**
+
 Ensure pdf2zh is installed and in your PATH:
 ```bash
 pip install pdf2zh
@@ -173,6 +253,15 @@ If installed in a custom location, specify the full path:
 {
   "pdfTranslate.pdf2zhPath": "C:\\Python\\Scripts\\pdf2zh.exe"
 }
+```
+
+### Python version incompatibility
+
+pdf2zh requires Python 3.10-3.12. If you have Python 3.13+:
+
+**Solution**: Use uv to automatically manage the correct Python version:
+```bash
+uv tool install --python 3.12 pdf2zh
 ```
 
 ### Translation fails with Google
