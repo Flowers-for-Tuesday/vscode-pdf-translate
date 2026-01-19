@@ -72,10 +72,10 @@ export class PDFTranslator {
             {
                 location: vscode.ProgressLocation.Notification,
                 title: `Translating PDF`,
-                cancellable: false
+                cancellable: true
             },
-            async (progress) => {
-                return this.executeTranslation(command, pdfPath, outputDir, config, progress);
+            async (progress, token) => {
+                return this.executeTranslation(command, pdfPath, outputDir, config, progress, token);
             }
         );
     }
@@ -88,7 +88,8 @@ export class PDFTranslator {
         pdfPath: string,
         outputDir: string,
         config: TranslationConfig,
-        progress?: vscode.Progress<{ message?: string; increment?: number }>
+        progress?: vscode.Progress<{ message?: string; increment?: number }>,
+        token?: vscode.CancellationToken
     ): Promise<TranslationResult> {
         return new Promise((resolve) => {
             const envVars = {
@@ -104,6 +105,24 @@ export class PDFTranslator {
 
             let stderr = '';
             let lastProgress = 0;
+            let isCancelled = false;
+
+            // Handle cancellation
+            if (token) {
+                token.onCancellationRequested(() => {
+                    isCancelled = true;
+                    this.outputChannel.appendLine('[INFO] Translation cancelled by user');
+
+                    // Kill the process and all child processes
+                    if (process.platform === 'win32') {
+                        // On Windows, use taskkill to kill process tree
+                        spawn('taskkill', ['/pid', childProcess.pid!.toString(), '/f', '/t'], { shell: true });
+                    } else {
+                        // On Unix, send SIGTERM to process group
+                        childProcess.kill('SIGTERM');
+                    }
+                });
+            }
 
             childProcess.stdout?.on('data', (data: Buffer) => {
                 this.outputChannel.append(data.toString());
@@ -142,7 +161,9 @@ export class PDFTranslator {
             childProcess.on('close', (code) => {
                 this.outputChannel.appendLine(`Process exited with code: ${code}`);
 
-                if (code === 0) {
+                if (isCancelled) {
+                    resolve({ error: 'Translation cancelled by user' });
+                } else if (code === 0) {
                     resolve(this.getOutputPaths(pdfPath, outputDir));
                 } else {
                     if (stderr) {

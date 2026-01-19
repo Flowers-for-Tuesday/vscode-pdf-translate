@@ -70,6 +70,11 @@ async function translateCommand(uri: vscode.Uri | undefined): Promise<void> {
         const result = await translator.translatePDF(pdfPath);
 
         if (result.error) {
+            // Handle user cancellation separately
+            if (result.error === 'Translation cancelled by user') {
+                vscode.window.showInformationMessage('Translation cancelled');
+                return;
+            }
             vscode.window.showErrorMessage(`Translation failed: ${result.error}`);
             translator.showOutput();
             return;

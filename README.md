@@ -13,6 +13,8 @@ A VSCode extension for translating PDF documents while preserving layout, formul
 - **Sidebar Preview**: Automatically previews translated PDF in VSCode sidebar
 - **Simple Configuration**: Minimal settings with sensible defaults
 
+![demo](demo/demo0.PNG)
+
 ## Prerequisites
 
 Before using this extension, you must install [pdf2zh](https://github.com/Byaidu/PDFMathTranslate).
@@ -99,6 +101,8 @@ Or search for "PDF Translate" in the VSCode marketplace (when published).
 ## Configuration
 
 Open VSCode settings (`Ctrl+,`) and search for "pdf translate":
+
+![demo](demo/demo1.PNG)
 
 ### Basic Settings
 

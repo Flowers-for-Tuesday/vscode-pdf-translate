@@ -42,6 +42,8 @@ npm run package
 - Builds command-line arguments from configuration
 - Spawns pdf2zh process with proper environment variables (API keys)
 - Streams stdout/stderr to VSCode output channel
+- Parses tqdm progress output and displays real-time progress bar
+- Supports cancellation with proper process tree termination (taskkill on Windows, SIGTERM on Unix)
 - Returns paths to generated files: `{baseName}-mono.pdf` (translated only) and `{baseName}-dual.pdf` (bilingual)
 
 **config.ts** - Configuration management (ConfigManager class)
@@ -63,8 +65,9 @@ npm run package
 3. PDFTranslator checks pdf2zh availability
 4. Spawns pdf2zh subprocess with: `pdf2zh "{input}" -o "{output}" -li {source} -lo {target} -s {service} -t {threads}`
 5. Environment variables from apiKeys config are injected into process
-6. Output files saved to `translated-pdfs/` subfolder (or custom directory)
-7. Opens mono PDF in sidebar using VSCode's built-in viewer
+6. Real-time progress bar displayed with cancellation support (user can click X to stop)
+7. Output files saved to `translated-pdfs/` subfolder (or custom directory)
+8. Opens mono PDF in sidebar using VSCode's built-in viewer
 
 ### External Dependencies
 
@@ -83,3 +86,5 @@ npm run package
 - API keys stored in VSCode settings and passed as environment variables to pdf2zh
 - Extension uses CommonJS module system (not ESM)
 - TypeScript compiled to ES2020 with strict mode enabled
+- Progress bar parses tqdm output format: `29%|██       | 2/7 [00:00<00:02,  2.08it/s]`
+- Cancellation uses `taskkill /f /t` on Windows to kill entire process tree

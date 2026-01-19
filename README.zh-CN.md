@@ -13,6 +13,8 @@
 - **侧边栏预览**：自动在VSCode侧边栏预览翻译后的PDF
 - **简单配置**：最少的设置，合理的默认值
 
+![demo](demo/demo0.PNG)
+
 ## 前置要求
 
 使用本插件前，必须先安装 [pdf2zh](https://github.com/Byaidu/PDFMathTranslate)。
@@ -99,6 +101,8 @@ pip install pdf2zh
 ## 配置说明
 
 打开VSCode设置（`Ctrl+,`）并搜索 "pdf translate"：
+
+![demo](demo/demo1.PNG)
 
 ### 基础设置
 
