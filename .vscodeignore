@@ -10,3 +10,7 @@ vsc-extension-quickstart.md
 **/*.ts
 node_modules/**
 out/test/**
+demo/**
+docs/**
+CLAUDE.md
+*.vsix
