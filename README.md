@@ -79,9 +79,14 @@ translated-pdfs/
 
 ### pdf2zh not found
 
+The extension automatically detects pdf2zh in:
+- Your configured path
+- uv default path: `~/.local/bin/pdf2zh`
+
+If still not found:
 1. **Restart VSCode**
-2. Check installation: `pdf2zh --version`
-3. Set full path in settings:
+2. Verify installation: `pdf2zh --version`
+3. Manually set path in settings:
    ```json
    { "pdfTranslate.pdf2zhPath": "C:\\Users\\Name\\.local\\bin\\pdf2zh.exe" }
    ```

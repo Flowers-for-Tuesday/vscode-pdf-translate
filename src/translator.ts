@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import { ConfigManager, TranslationConfig } from './config';
@@ -21,17 +22,39 @@ export class PDFTranslator {
     }
 
     /**
-     * Check if pdf2zh is installed and available
+     * Get possible pdf2zh paths including uv default installation path
      */
-    private async checkPdf2zhInstalled(pdf2zhPath: string): Promise<boolean> {
-        try {
-            const { stdout } = await execPromise(`"${pdf2zhPath}" --version`);
-            this.outputChannel.appendLine(`pdf2zh found: ${stdout.trim()}`);
-            return true;
-        } catch (error) {
-            this.outputChannel.appendLine(`pdf2zh not found at: ${pdf2zhPath}`);
-            return false;
+    private getPossiblePdf2zhPaths(configuredPath: string): string[] {
+        const paths: string[] = [configuredPath];
+
+        // Add uv default installation path
+        const homeDir = os.homedir();
+        if (process.platform === 'win32') {
+            paths.push(path.join(homeDir, '.local', 'bin', 'pdf2zh.exe'));
+        } else {
+            paths.push(path.join(homeDir, '.local', 'bin', 'pdf2zh'));
         }
+
+        return paths;
+    }
+
+    /**
+     * Check if pdf2zh is installed and available, returns the working path
+     */
+    private async findPdf2zhPath(configuredPath: string): Promise<string | null> {
+        const possiblePaths = this.getPossiblePdf2zhPaths(configuredPath);
+
+        for (const pdf2zhPath of possiblePaths) {
+            try {
+                const { stdout } = await execPromise(`"${pdf2zhPath}" --version`);
+                this.outputChannel.appendLine(`pdf2zh found at: ${pdf2zhPath} (${stdout.trim()})`);
+                return pdf2zhPath;
+            } catch (error) {
+                this.outputChannel.appendLine(`pdf2zh not found at: ${pdf2zhPath}`);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -40,11 +63,11 @@ export class PDFTranslator {
     async translatePDF(pdfPath: string, configOverride?: Partial<TranslationConfig>): Promise<TranslationResult> {
         const config = { ...ConfigManager.getConfig(), ...configOverride };
 
-        // Check if pdf2zh is installed
-        const isInstalled = await this.checkPdf2zhInstalled(config.pdf2zhPath);
-        if (!isInstalled) {
+        // Find pdf2zh executable (tries configured path first, then uv default path)
+        const pdf2zhPath = await this.findPdf2zhPath(config.pdf2zhPath);
+        if (!pdf2zhPath) {
             const choice = await vscode.window.showErrorMessage(
-                'pdf2zh is not installed or not found in PATH. Would you like to see installation instructions?',
+                'pdf2zh is not installed or not found. Would you like to see installation instructions?',
                 'Show Instructions',
                 'Cancel'
             );
@@ -62,8 +85,8 @@ export class PDFTranslator {
             fs.mkdirSync(outputDir, { recursive: true });
         }
 
-        // Build and execute command
-        const command = this.buildCommand(pdfPath, outputDir, config);
+        // Build and execute command with the found pdf2zh path
+        const command = this.buildCommand(pdfPath, outputDir, { ...config, pdf2zhPath });
         this.outputChannel.appendLine(`Output directory: ${outputDir}`);
         this.outputChannel.appendLine(`Executing: ${command}`);
 

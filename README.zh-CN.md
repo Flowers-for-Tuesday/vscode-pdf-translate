@@ -79,9 +79,14 @@ translated-pdfs/
 
 ### 找不到 pdf2zh
 
+扩展会自动检测以下路径：
+- 用户配置的路径
+- uv 默认路径：`~/.local/bin/pdf2zh`
+
+如果仍然找不到：
 1. **重启 VSCode**
-2. 检查安装：`pdf2zh --version`
-3. 在设置中指定完整路径：
+2. 验证安装：`pdf2zh --version`
+3. 手动设置路径：
    ```json
    { "pdfTranslate.pdf2zhPath": "C:\\Users\\用户名\\.local\\bin\\pdf2zh.exe" }
    ```
