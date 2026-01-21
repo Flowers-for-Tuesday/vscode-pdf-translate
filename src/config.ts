@@ -7,6 +7,7 @@ export interface TranslationConfig {
     threads: number;
     pdf2zhPath: string;
     outputDirectory: string;
+    pageRange: string;
     apiKeys: { [key: string]: string };
 }
 
@@ -23,6 +24,7 @@ export class ConfigManager {
             threads: config.get('threads', 4),
             pdf2zhPath: config.get('pdf2zhPath', 'pdf2zh'),
             outputDirectory: config.get('outputDirectory', ''),
+            pageRange: config.get('pageRange', ''),
             apiKeys: config.get('apiKeys', {})
         };
     }

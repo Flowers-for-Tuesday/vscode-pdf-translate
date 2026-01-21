@@ -9,6 +9,7 @@ Translate PDF documents while preserving layout, formulas, and figures. Powered 
 - **Layout Preservation** - Maintains original formatting, formulas, and figures
 - **40+ Languages** - English, Chinese, Japanese, Korean, French, German, and more
 - **14+ Translation Services** - Google, Bing, OpenAI, DeepL, Gemini, etc.
+- **Page Range Selection** - Translate specific pages (e.g., 1-3,5)
 - **Dual Output** - Generates translated-only and bilingual versions
 - **Real-time Progress** - Shows translation progress with cancel support
 - **One-Click Translate** - Right-click any PDF to translate
@@ -45,6 +46,7 @@ uv tool install --python 3.12 pdf2zh
 | `targetLanguage` | `zh` | Target language |
 | `translationService` | `bing` | Translation service |
 | `threads` | `4` | Parallel threads |
+| `pageRange` | (empty) | Page range (e.g., `1-3,5`) |
 
 ### Translation Services
 

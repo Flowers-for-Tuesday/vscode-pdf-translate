@@ -43,11 +43,13 @@ async function translateCommand(uri: vscode.Uri | undefined): Promise<void> {
     const config = ConfigManager.getConfig();
     const fileName = path.basename(pdfPath);
 
-    // Confirm translation
-    const message = `Translate "${fileName}" from ${config.sourceLanguage} to ${config.targetLanguage}?`;
+    // Build confirmation message with page range info
+    const pageRangeInfo = config.pageRange ? ` (pages: ${config.pageRange})` : ' (all pages)';
+    const message = `Translate "${fileName}" from ${config.sourceLanguage} to ${config.targetLanguage}${pageRangeInfo}?`;
     const choice = await vscode.window.showInformationMessage(
         message,
         'Translate',
+        'Set Page Range',
         'Change Languages',
         'Cancel'
     );
@@ -65,9 +67,36 @@ async function translateCommand(uri: vscode.Uri | undefined): Promise<void> {
         return;
     }
 
+    // Handle page range selection
+    let pageRange = config.pageRange;
+    if (choice === 'Set Page Range') {
+        const input = await vscode.window.showInputBox({
+            prompt: 'Enter page range (e.g., "1-3,5" for pages 1-3 and 5)',
+            placeHolder: 'Leave empty for all pages',
+            value: config.pageRange,
+            validateInput: (value) => {
+                if (!value || value.trim() === '') {
+                    return null; // Empty is valid (all pages)
+                }
+                // Basic validation for page range format
+                const pattern = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+                if (!pattern.test(value.trim())) {
+                    return 'Invalid format. Use format like "1-3,5" or "1,2,3"';
+                }
+                return null;
+            }
+        });
+
+        if (input === undefined) {
+            // User cancelled
+            return;
+        }
+        pageRange = input.trim();
+    }
+
     try {
         // Translate PDF (progress bar will be shown automatically)
-        const result = await translator.translatePDF(pdfPath);
+        const result = await translator.translatePDF(pdfPath, { pageRange });
 
         if (result.error) {
             // Handle user cancellation separately

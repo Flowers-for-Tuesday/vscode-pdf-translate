@@ -240,6 +240,10 @@ export class PDFTranslator {
             parts.push(`-t ${config.threads}`);
         }
 
+        if (config.pageRange && config.pageRange.trim()) {
+            parts.push(`-p ${config.pageRange.trim()}`);
+        }
+
         return parts.join(' ');
     }
 

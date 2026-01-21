@@ -2,7 +2,7 @@
   "name": "vscode-pdf-translate",
   "displayName": "PDF Translate",
   "description": "Translate PDF files with PDFMathTranslate while preserving layout, formulas and figures",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "publisher": "Siesta",
   "engines": {
     "vscode": "^1.85.0"
@@ -195,6 +195,11 @@
           "type": "string",
           "default": "",
           "description": "Custom output directory for translated PDFs. Leave empty to use 'translated-pdfs' subfolder in the source PDF's directory."
+        },
+        "pdfTranslate.pageRange": {
+          "type": "string",
+          "default": "",
+          "description": "Page range to translate (e.g., '1-3,5' for pages 1-3 and 5). Leave empty to translate all pages."
         },
         "pdfTranslate.apiKeys": {
           "type": "object",
