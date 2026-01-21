@@ -26,6 +26,7 @@ uv tool install --python 3.12 pdf2zh
 **macOS / Linux**:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
 uv tool install --python 3.12 pdf2zh
 ```
 
