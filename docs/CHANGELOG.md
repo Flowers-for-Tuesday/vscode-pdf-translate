@@ -4,6 +4,88 @@
 
 ---
 
+## 2025-01-25
+
+### 添加自动环境配置功能
+
+**新增文件:**
+- `src/environmentManager.ts`
+
+**修改文件:**
+- `src/extension.ts`
+- `src/translator.ts`
+- `package.json`
+- `CLAUDE.md`
+
+**功能描述:**
+当检测到 pdf2zh 未安装时，自动安装 uv 和 pdf2zh，无需用户手动配置环境。
+
+**实现细节:**
+
+1. **EnvironmentManager 类** (environmentManager.ts)
+   - `checkUvInstalled()`: 检测 uv 是否已安装
+   - `checkPdf2zhInstalled()`: 检测 pdf2zh 是否已安装
+   - `getStatus()`: 获取当前环境状态
+   - `installUv()`: 自动安装 uv 包管理器
+     - Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+     - Unix: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+   - `installPdf2zh()`: 使用 uv 安装 pdf2zh
+     - Unix: `source "$HOME/.local/bin/env" && uv tool install --python 3.12 pdf2zh`
+     - Windows: `uv tool install --python 3.12 pdf2zh`
+   - `ensureEnvironment()`: 主入口，确保环境就绪
+
+2. **进度通知窗口**
+   - 使用 `vscode.window.withProgress` 显示实时进度
+   - 实时显示终端输出（如 "Downloading onnx (15.6MiB)"）
+   - 支持用户取消（点击 X 按钮）
+   - 自动过滤 ANSI 转义码，显示干净的输出
+
+3. **翻译器集成** (translator.ts)
+   - 翻译前自动检测环境
+   - 未安装时弹出询问对话框：
+     - `Install Automatically`: 自动安装
+     - `Manual Instructions`: 打开手动安装说明
+     - `Cancel`: 取消
+   - 缓存已验证的 pdf2zh 路径，避免重复检测
+
+4. **新增命令** (extension.ts, package.json)
+   - `pdfTranslate.setupEnvironment`: 手动触发环境初始化
+   - 命令名称: "PDF Translate: Setup Environment"
+
+**用户体验改进:**
+- ✅ 零配置安装 - 无需手动安装 uv 和 pdf2zh
+- ✅ 实时进度显示 - 显示下载和安装状态
+- ✅ 可取消操作 - 随时中断安装过程
+- ✅ 跨平台支持 - Windows/macOS/Linux 自动适配
+- ✅ 智能检测 - 已安装则跳过，避免重复安装
+
+**安装流程图:**
+```
+翻译 PDF
+    │
+    ▼
+检测 pdf2zh ──存在──► 直接翻译
+    │
+   不存在
+    │
+    ▼
+弹出对话框
+[Install Automatically] [Manual Instructions] [Cancel]
+    │
+    ▼ (选择自动安装)
+┌─────────────────────────────────────┐
+│ 📦 Initializing PDF Translation     │
+│    Environment                      │
+│ ─────────────────────────────────── │
+│ Downloading onnx (15.6MiB)      [X] │
+└─────────────────────────────────────┘
+    │
+    ▼
+安装 uv (如未安装) ──► 安装 pdf2zh ──► 验证 ──► 开始翻译
+```
+
+---
+
 ## 2026-01-21
 
 ### 添加页面范围翻译功能
@@ -200,12 +282,12 @@ uv tool install --python 3.12 pdf2zh
 
 ### 短期
 - [x] 添加进度条取消功能 ✅ (2026-01-19)
+- [x] 添加一键安装 uv 和 pdf2zh 的命令 ✅ (2025-01-25)
 - [ ] 改进错误提示（在进度条中显示）
 - [ ] 添加状态栏进度显示
 
 ### 中期
 - [ ] 支持批量翻译多个 PDF
-- [ ] 添加一键安装 uv 和 pdf2zh 的命令
 - [ ] 添加诊断工具检测环境问题
 - [ ] 创建安装演示 GIF
 
@@ -218,6 +300,13 @@ uv tool install --python 3.12 pdf2zh
 ---
 
 ## 版本历史 (Version History)
+
+### v1.3.0 (2025-01-25)
+- ✅ 添加自动环境配置功能
+- ✅ 自动安装 uv 和 pdf2zh
+- ✅ 实时显示安装进度和终端输出
+- ✅ 支持取消安装过程
+- ✅ 新增 `PDF Translate: Setup Environment` 命令
 
 ### v1.2.0 (2026-01-21)
 - ✅ 添加页面范围翻译功能

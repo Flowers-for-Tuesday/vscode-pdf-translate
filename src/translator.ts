@@ -5,6 +5,7 @@ import * as os from 'os';
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import { ConfigManager, TranslationConfig } from './config';
+import { EnvironmentManager } from './environmentManager';
 
 const execPromise = promisify(exec);
 
@@ -16,9 +17,12 @@ export interface TranslationResult {
 
 export class PDFTranslator {
     private outputChannel: vscode.OutputChannel;
+    private environmentManager: EnvironmentManager;
+    private verifiedPdf2zhPath: string | null = null;
 
     constructor() {
         this.outputChannel = vscode.window.createOutputChannel('PDF Translate');
+        this.environmentManager = new EnvironmentManager(this.outputChannel);
     }
 
     /**
@@ -63,20 +67,37 @@ export class PDFTranslator {
     async translatePDF(pdfPath: string, configOverride?: Partial<TranslationConfig>): Promise<TranslationResult> {
         const config = { ...ConfigManager.getConfig(), ...configOverride };
 
-        // Find pdf2zh executable (tries configured path first, then uv default path)
-        const pdf2zhPath = await this.findPdf2zhPath(config.pdf2zhPath);
+        // First try to find pdf2zh using the configured path or cached verified path
+        let pdf2zhPath = this.verifiedPdf2zhPath || await this.findPdf2zhPath(config.pdf2zhPath);
+
         if (!pdf2zhPath) {
-            const choice = await vscode.window.showErrorMessage(
-                'pdf2zh is not installed or not found. Would you like to see installation instructions?',
-                'Show Instructions',
+            // pdf2zh not found - ask user if they want to auto-install
+            const choice = await vscode.window.showInformationMessage(
+                'pdf2zh is not installed. Would you like to install it automatically?',
+                'Install Automatically',
+                'Manual Instructions',
                 'Cancel'
             );
 
-            if (choice === 'Show Instructions') {
+            if (choice === 'Manual Instructions') {
                 vscode.env.openExternal(vscode.Uri.parse('https://github.com/Byaidu/PDFMathTranslate#installation'));
+                return { error: 'pdf2zh not installed' };
             }
 
-            return { error: 'pdf2zh not installed' };
+            if (choice !== 'Install Automatically') {
+                return { error: 'pdf2zh not installed' };
+            }
+
+            // Run automatic environment setup
+            this.outputChannel.show();
+            pdf2zhPath = await this.environmentManager.ensureEnvironment();
+
+            if (!pdf2zhPath) {
+                return { error: 'Environment initialization failed or was cancelled' };
+            }
+
+            // Cache the verified path
+            this.verifiedPdf2zhPath = pdf2zhPath;
         }
 
         // Get output directory

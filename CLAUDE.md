@@ -35,7 +35,16 @@ npm run package
 **extension.ts** - Entry point that registers commands and initializes the extension
 - `pdfTranslate.translate` - Main translation command triggered from context menu or command palette
 - `pdfTranslate.selectLanguages` - Interactive language selector command
+- `pdfTranslate.setupEnvironment` - Manual environment setup command
 - Translation workflow: prompt user → validate config → execute pdf2zh → open translated PDF in sidebar
+
+**environmentManager.ts** - Automatic environment configuration (EnvironmentManager class)
+- Detects if uv and pdf2zh are installed
+- Automatically installs uv using the official installer (astral.sh)
+- Installs pdf2zh via `uv tool install pdf2zh` command
+- Shows real-time progress notifications with terminal output during installation
+- Supports cancellation during the setup process
+- Works cross-platform (Windows PowerShell, Unix shell)
 
 **translator.ts** - Translation execution engine (PDFTranslator class)
 - Verifies pdf2zh installation before translation
@@ -62,16 +71,28 @@ npm run package
 
 1. User triggers command → extension.ts validates PDF path
 2. ConfigManager reads settings and prompts for confirmation
-3. PDFTranslator checks pdf2zh availability
-4. Spawns pdf2zh subprocess with: `pdf2zh "{input}" -o "{output}" -li {source} -lo {target} -s {service} -t {threads}`
-5. Environment variables from apiKeys config are injected into process
-6. Real-time progress bar displayed with cancellation support (user can click X to stop)
-7. Output files saved to `translated-pdfs/` subfolder (or custom directory)
-8. Opens mono PDF in sidebar using VSCode's built-in viewer
+3. PDFTranslator checks pdf2zh availability → if not found, prompts for auto-install
+4. If auto-install chosen: EnvironmentManager installs uv (if needed) and pdf2zh with real-time progress
+5. Spawns pdf2zh subprocess with: `pdf2zh "{input}" -o "{output}" -li {source} -lo {target} -s {service} -t {threads}`
+6. Environment variables from apiKeys config are injected into process
+7. Real-time progress bar displayed with cancellation support (user can click X to stop)
+8. Output files saved to `translated-pdfs/` subfolder (or custom directory)
+9. Opens mono PDF in sidebar using VSCode's built-in viewer
+
+### Environment Auto-Setup
+
+When pdf2zh is not detected, the extension offers automatic installation:
+1. User prompted: "Install Automatically" / "Manual Instructions" / "Cancel"
+2. If auto-install: Progress notification appears showing real-time terminal output
+3. uv package manager installed from astral.sh (if not present)
+4. pdf2zh installed via `uv tool install --python 3.12 pdf2zh`
+5. Progress shows download status (e.g., "Downloading onnx (15.6MiB)")
+6. On success, translation proceeds automatically
 
 ### External Dependencies
 
-- **pdf2zh CLI** (required): Must be installed via `pip install pdf2zh`
+- **pdf2zh CLI**: Auto-installed via uv, or manually via `uv tool install --python 3.12 pdf2zh`
+- **uv**: Auto-installed from astral.sh, or manually from https://docs.astral.sh/uv/
 - **Translation Services**: Supports 14+ services (Google, Bing, OpenAI, DeepL, etc.)
   - Free services: google, bing, deeplx
   - API key required: openai, deepl, gemini, azure-openai, etc.

@@ -6,6 +6,7 @@ Translate PDF documents while preserving layout, formulas, and figures. Powered 
 
 ## Features
 
+- **Auto Environment Setup** - Automatically installs uv and pdf2zh if not present
 - **Layout Preservation** - Maintains original formatting, formulas, and figures
 - **40+ Languages** - English, Chinese, Japanese, Korean, French, German, and more
 - **14+ Translation Services** - Google, Bing, OpenAI, DeepL, Gemini, etc.
@@ -16,7 +17,19 @@ Translate PDF documents while preserving layout, formulas, and figures. Powered 
 
 ## Quick Start
 
-### 1. Install pdf2zh (Required)
+### Automatic Setup (Recommended)
+
+Just right-click a PDF and select **Translate PDF** - the extension will automatically install all dependencies if needed!
+
+The progress window shows real-time installation status:
+```
+Initializing PDF Translation Environment
+Downloading onnx (15.6MiB)
+```
+
+### Manual Installation (Optional)
+
+If you prefer to install dependencies manually:
 
 **Windows** (PowerShell):
 ```powershell
@@ -31,7 +44,7 @@ source $HOME/.local/bin/env
 uv tool install --python 3.12 pdf2zh
 ```
 
-### 2. Translate PDF
+### Translate PDF
 
 - **Right-click** a PDF file → **Translate PDF**
 - Or press `Ctrl+Shift+P` → **Translate PDF**
@@ -61,11 +74,12 @@ uv tool install --python 3.12 pdf2zh
 ```json
 {
   "pdfTranslate.apiKeys": {
-    "OPENAI_API_KEY": "sk-xxx",
-    "DEEPL_AUTH_KEY": "your-key"
+    "DEEPSEEK_API_KEY": "sk-xxx",
+    "DEEPSEEK_MODEL": "deepseek-chat"
   }
 }
 ```
+Refer to [PDFMathTranslate/blob/main/docs/ADVANCED.md#services](https://github.com/PDFMathTranslate/PDFMathTranslate/blob/main/docs/ADVANCED.md#services) for detailed environment variable names
 
 ## Output
 
@@ -82,14 +96,12 @@ translated-pdfs/
 
 ### pdf2zh not found
 
-The extension automatically detects pdf2zh in:
-- Your configured path
-- uv default path: `~/.local/bin/pdf2zh`
+The extension will automatically install pdf2zh when you first translate a PDF. If auto-installation fails:
 
-If still not found:
-1. **Restart VSCode**
-2. Verify installation: `pdf2zh --version`
-3. Manually set path in settings:
+1. **Check the Output panel** for detailed error messages
+2. **Restart VSCode** and try again
+3. **Manual installation**: Run `PDF Translate: Setup Environment` from Command Palette
+4. **Set custom path** in settings:
    ```json
    { "pdfTranslate.pdf2zhPath": "C:\\Users\\Name\\.local\\bin\\pdf2zh.exe" }
    ```

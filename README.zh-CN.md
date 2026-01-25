@@ -6,6 +6,7 @@
 
 ## 功能特性
 
+- **自动环境配置** - 自动安装 uv 和 pdf2zh，无需手动配置
 - **保留布局** - 保持原始格式、公式和图片
 - **40+ 语言** - 中文、英文、日文、韩文、法文、德文等
 - **14+ 翻译服务** - Google、Bing、OpenAI、DeepL、Gemini 等
@@ -16,7 +17,19 @@
 
 ## 快速开始
 
-### 1. 安装 pdf2zh（必需）
+### 自动安装（推荐）
+
+直接右键点击 PDF 文件选择 **Translate PDF** - 扩展会自动安装所有依赖！
+
+进度窗口会实时显示安装状态：
+```
+Initializing PDF Translation Environment
+Downloading onnx (15.6MiB)
+```
+
+### 手动安装（可选）
+
+如果你更喜欢手动安装依赖：
 
 **Windows** (PowerShell):
 ```powershell
@@ -31,7 +44,7 @@ source $HOME/.local/bin/env
 uv tool install --python 3.12 pdf2zh
 ```
 
-### 2. 翻译 PDF
+### 翻译 PDF
 
 - **右键点击** PDF 文件 → **Translate PDF**
 - 或按 `Ctrl+Shift+P` → **Translate PDF**
@@ -61,11 +74,12 @@ uv tool install --python 3.12 pdf2zh
 ```json
 {
   "pdfTranslate.apiKeys": {
-    "OPENAI_API_KEY": "sk-xxx",
-    "DEEPL_AUTH_KEY": "your-key"
+    "DEEPSEEK_API_KEY": "sk-xxx",
+    "DEEPSEEK_MODEL": "deepseek-chat"
   }
 }
 ```
+详细的环境变量名参考[PDFMathTranslate/blob/main/docs/ADVANCED.md#services](https://github.com/PDFMathTranslate/PDFMathTranslate/blob/main/docs/ADVANCED.md#services)
 
 ## 输出文件
 
@@ -82,14 +96,12 @@ translated-pdfs/
 
 ### 找不到 pdf2zh
 
-扩展会自动检测以下路径：
-- 用户配置的路径
-- uv 默认路径：`~/.local/bin/pdf2zh`
+扩展会在首次翻译 PDF 时自动安装 pdf2zh。如果自动安装失败：
 
-如果仍然找不到：
-1. **重启 VSCode**
-2. 验证安装：`pdf2zh --version`
-3. 手动设置路径：
+1. **查看输出面板** 获取详细错误信息
+2. **重启 VSCode** 然后重试
+3. **手动安装**: 在命令面板运行 `PDF Translate: Setup Environment`
+4. **设置自定义路径**:
    ```json
    { "pdfTranslate.pdf2zhPath": "C:\\Users\\用户名\\.local\\bin\\pdf2zh.exe" }
    ```

@@ -2,11 +2,17 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { PDFTranslator } from './translator';
 import { ConfigManager } from './config';
+import { EnvironmentManager } from './environmentManager';
 
 let translator: PDFTranslator;
+let environmentManager: EnvironmentManager;
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('PDF Translate extension is now active');
+
+    // Create output channel for environment manager
+    const outputChannel = vscode.window.createOutputChannel('PDF Translate');
+    environmentManager = new EnvironmentManager(outputChannel);
 
     translator = new PDFTranslator();
 
@@ -29,7 +35,21 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    // Register environment setup command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('pdfTranslate.setupEnvironment', async () => {
+            outputChannel.show();
+            const pdf2zhPath = await environmentManager.ensureEnvironment();
+            if (pdf2zhPath) {
+                vscode.window.showInformationMessage(
+                    `Environment ready! pdf2zh installed at: ${pdf2zhPath}`
+                );
+            }
+        })
+    );
+
     context.subscriptions.push(translator);
+    context.subscriptions.push(outputChannel);
 }
 
 async function translateCommand(uri: vscode.Uri | undefined): Promise<void> {
