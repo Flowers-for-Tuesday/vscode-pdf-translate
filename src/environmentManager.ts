@@ -155,7 +155,7 @@ export class EnvironmentManager {
                     const lines = output.split('\n');
                     const lastLine = stripAnsi(lines[lines.length - 1] || '').trim();
                     if (lastLine) {
-                        progress.report({ message: `Installing uv: ${lastLine.substring(0, 60)}` });
+                        progress.report({ message: lastLine.substring(0, 80) });
                     }
                 }
             });
@@ -165,7 +165,7 @@ export class EnvironmentManager {
                 if (output) {
                     this.outputChannel.appendLine(`[STDERR] ${output}`);
                     const cleanOutput = stripAnsi(output).trim();
-                    progress.report({ message: `Installing uv: ${cleanOutput.substring(0, 60)}` });
+                    progress.report({ message: cleanOutput.substring(0, 80) });
                 }
             });
 
