@@ -301,6 +301,11 @@ uv tool install --python 3.12 pdf2zh
 
 ## 版本历史 (Version History)
 
+### v1.3.3 (2026-03-23)
+- ✅ 修复 pymupdf 字体子集化 bug（`ValueError: bad 'value'`）
+- ✅ 检测到字体错误时自动使用 `--skip-subset-fonts` 重试，无需手动配置
+- ✅ 新增 `pdfTranslate.skipSubsetFonts` 配置项
+
 ### v1.3.0 (2025-01-25)
 - ✅ 添加自动环境配置功能
 - ✅ 自动安装 uv 和 pdf2zh
