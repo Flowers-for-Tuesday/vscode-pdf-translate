@@ -19,6 +19,7 @@ export class PDFTranslator {
     private outputChannel: vscode.OutputChannel;
     private environmentManager: EnvironmentManager;
     private verifiedPdf2zhPath: string | null = null;
+    private lastStderr: string = '';
 
     constructor() {
         this.outputChannel = vscode.window.createOutputChannel('PDF Translate');
@@ -107,7 +108,8 @@ export class PDFTranslator {
         }
 
         // Build and execute command with the found pdf2zh path
-        const command = this.buildCommand(pdfPath, outputDir, { ...config, pdf2zhPath });
+        const effectiveConfig = { ...config, pdf2zhPath };
+        const command = this.buildCommand(pdfPath, outputDir, effectiveConfig);
         this.outputChannel.appendLine(`Output directory: ${outputDir}`);
         this.outputChannel.appendLine(`Executing: ${command}`);
 
@@ -119,7 +121,22 @@ export class PDFTranslator {
                 cancellable: true
             },
             async (progress, token) => {
-                return this.executeTranslation(command, pdfPath, outputDir, config, progress, token);
+                const result = await this.executeTranslation(command, pdfPath, outputDir, effectiveConfig, progress, token);
+
+                // Auto-retry with --skip-subset-fonts if font subsetting fails
+                if (result.error && result.error.includes('exit code 1') && !effectiveConfig.skipSubsetFonts) {
+                    if (this.lastStderr.includes("ValueError: bad 'value'") || this.lastStderr.includes('subset_fonts')) {
+                        this.outputChannel.appendLine('[INFO] Font subsetting error detected, retrying with --skip-subset-fonts...');
+                        progress.report({ message: 'Retrying with --skip-subset-fonts...' });
+
+                        const retryConfig = { ...effectiveConfig, skipSubsetFonts: true };
+                        const retryCommand = this.buildCommand(pdfPath, outputDir, retryConfig);
+                        this.outputChannel.appendLine(`Retrying: ${retryCommand}`);
+                        return this.executeTranslation(retryCommand, pdfPath, outputDir, retryConfig, progress, token);
+                    }
+                }
+
+                return result;
             }
         );
     }
@@ -148,6 +165,7 @@ export class PDFTranslator {
             });
 
             let stderr = '';
+            this.lastStderr = '';
             let lastProgress = 0;
             let isCancelled = false;
 
@@ -175,6 +193,7 @@ export class PDFTranslator {
             childProcess.stderr?.on('data', (data: Buffer) => {
                 const output = data.toString();
                 stderr += output;
+                this.lastStderr += output;
                 this.outputChannel.append(`[STDERR] ${output}`);
 
                 // Parse progress from tqdm output
