@@ -8,6 +8,7 @@ export interface TranslationConfig {
     pdf2zhPath: string;
     outputDirectory: string;
     pageRange: string;
+    skipSubsetFonts: boolean;
     apiKeys: { [key: string]: string };
 }
 
@@ -25,6 +26,7 @@ export class ConfigManager {
             pdf2zhPath: config.get('pdf2zhPath', 'pdf2zh'),
             outputDirectory: config.get('outputDirectory', ''),
             pageRange: config.get('pageRange', ''),
+            skipSubsetFonts: config.get('skipSubsetFonts', false),
             apiKeys: config.get('apiKeys', {})
         };
     }

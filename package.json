@@ -205,6 +205,11 @@
           "default": "",
           "description": "Page range to translate (e.g., '1-3,5' for pages 1-3 and 5). Leave empty to translate all pages."
         },
+        "pdfTranslate.skipSubsetFonts": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip font subsetting step (--skip-subset-fonts). Enable this if translation fails with 'ValueError: bad value' or font-related errors."
+        },
         "pdfTranslate.apiKeys": {
           "type": "object",
           "default": {},

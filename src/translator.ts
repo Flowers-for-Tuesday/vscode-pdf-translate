@@ -265,6 +265,10 @@ export class PDFTranslator {
             parts.push(`-p ${config.pageRange.trim()}`);
         }
 
+        if (config.skipSubsetFonts) {
+            parts.push('--skip-subset-fonts');
+        }
+
         return parts.join(' ');
     }
 
